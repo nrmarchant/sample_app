@@ -9,6 +9,8 @@ describe "Authentication" do
 
 		it {should have_content('Sign in') }
 		it {should have_title('Sign in') }
+		it { should_not have_link('Profile') }
+		it { should_not have_link('Settings') }
 	end	
 
 	describe "signin" do
@@ -62,6 +64,20 @@ describe "Authentication" do
 					it "should render the desired protected page" do
 						expect(page).to have_title('Edit user')
 					end
+
+					describe "when signing in again" do
+						before do
+							click_link "Sign out"
+							visit signin_path
+							fill_in "Email",	with: user.email
+							fill_in "Password", with: user.password
+							click_button "Sign in"
+						end
+
+						it "should render the default (profile) page" do
+							expect(page).to have_title(user.name)
+						end
+					end
 				end
 			end
 
@@ -80,6 +96,19 @@ describe "Authentication" do
 				describe "visiting the user index" do
 					before { visit users_path }
 					it { should have_title('Sign in') }
+				end
+			end
+
+			describe "in the Microposts controller" do
+				
+				describe "submitting to the create action" do
+					before { post microposts_path }
+					specify { expect(response).to redirect_to(signin_path) }
+				end
+
+				describe "submitting to the destroy action" do
+					before { delete micropost_path(FactoryGirl.create(:micropost)) }
+					specify { expect(response).to redirect_to(signin_path) }
 				end
 			end
 		end
@@ -109,6 +138,26 @@ describe "Authentication" do
 
 			describe "submitting a DELETE request to the Users#destroy action" do
 				before { delete user_path(user) }
+				specify { expect(response).to redirect_to(root_url) }
+			end
+		end
+
+		describe "for signed in users" do
+			let(:user) { FactoryGirl.create(:user) }
+			before { sign_in user, no_capybara: true }
+
+			describe "submitting a GET request to Users#new action from the signup_path" do
+				before { get signup_path }
+				specify { expect(response).to redirect_to(root_url) }
+			end
+
+			describe "submitting a GET request to Users#new action from the new_user_path" do
+				before { get new_user_path }
+				specify { expect(response).to redirect_to(root_url) }
+			end
+
+			describe "submitting a POST request to Users#create action" do
+				before { post users_path }
 				specify { expect(response).to redirect_to(root_url) }
 			end
 		end

@@ -39,9 +39,19 @@ class User < ActiveRecord::Base
 		relationships.find_by(followed_id: other_user.id).destroy
 	end
 
+	def send_password_reset
+		update_attribute(:password_reset_token, generate_reset_token)
+		update_attribute(:password_reset_sent_at, Time.zone.now)
+		UserMailer.password_reset(self).deliver
+	end
+
 	private
 
 		def create_remember_token
 			self.remember_token = User.digest(User.new_remember_token)
+		end
+
+		def generate_reset_token
+			SecureRandom.urlsafe_base64
 		end
 end

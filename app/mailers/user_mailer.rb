@@ -11,4 +11,16 @@ class UserMailer < ActionMailer::Base
 
     mail :to => user.email, :subject => "Password Reset"
   end
+
+  def confirm_email(user)
+    @user = user
+
+    mail :to => user.email, :subject => "Welcome to apptitle"
+  end
+
+  def update_email(user)
+    @user = user
+
+    mail :to => user.email, :subject => "apptitle email update"
+  end
 end

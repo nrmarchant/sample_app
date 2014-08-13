@@ -11,7 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140807022719) do
+ActiveRecord::Schema.define(version: 20140812234908) do
+
+  create_table "confirmations", force: true do |t|
+    t.integer  "state"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "previous_email"
+  end
+
+  add_index "confirmations", ["state", "user_id"], name: "index_confirmations_on_state_and_user_id"
 
   create_table "microposts", force: true do |t|
     t.string   "content"

@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+	has_one  :confirmation, dependent: :destroy
 	has_many :microposts, dependent: :destroy
 	has_many :relationships, foreign_key: "follower_id", dependent: :destroy
 	has_many :reverse_relationships, foreign_key: "followed_id",
@@ -43,6 +44,14 @@ class User < ActiveRecord::Base
 		update_attribute(:password_reset_token, generate_reset_token)
 		update_attribute(:password_reset_sent_at, Time.zone.now)
 		UserMailer.password_reset(self).deliver
+	end
+
+	def send_email_confirmation
+		UserMailer.confirm_email(self).deliver
+	end
+
+	def send_update_email
+		UserMailer.update_email(self).deliver
 	end
 
 	private

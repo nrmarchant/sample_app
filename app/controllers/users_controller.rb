@@ -21,8 +21,10 @@ class UsersController < ApplicationController
   	@user = User.new(user_params)
   	if @user.save
       sign_in @user
+      Confirmation.create(user_id: @user.id, state: 0, previous_email: @user.email)
+      @user.send_email_confirmation
       flash[:success] = "Welcome to the Sample App!"
-  		redirect_to @user
+  		redirect_to(root_url)
   	else
   		render 'new'
   	end
@@ -33,8 +35,12 @@ class UsersController < ApplicationController
 
   def update
     if @user.update_attributes(user_params)
+      if @user.confirmation.previous_email != @user.email
+        @user.confirmation.update_email
+        @user.send_update_email
+      end
       flash[:success] = "Profile updated"
-      redirect_to @user
+      redirect_to(root_url)
     else
       render 'edit'
     end
